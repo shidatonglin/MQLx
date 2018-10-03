@@ -48,6 +48,7 @@ bool COrderManager::TradeOpen(const string symbol,ENUM_ORDER_TYPE type,double pr
    int trades_total = TradesTotal();
    int orders_total = OrdersTotal();
    m_symbol=m_symbol_man.Get(symbol);
+   //Print("max oder-->", m_max_orders, " \n order total", orders_total, " \n m_max_trades", m_max_trades);
    if(!CheckPointer(m_symbol))
       return false;
    if(!IsPositionAllowed(type))
@@ -64,6 +65,8 @@ bool COrderManager::TradeOpen(const string symbol,ENUM_ORDER_TYPE type,double pr
          tp = m_main_stop.TakeProfitCustom()?m_main_stop.TakeProfitCustom(symbol,type,price):m_main_stop.TakeProfitCalculate(symbol,type,price);
         }
       double lotsize=LotSizeCalculate(price,type,sl);
+      if(!CMoneyBase::MarginCheck(symbol, lotsize))
+         return false;
       if(CheckPointer(m_main_stop)==POINTER_DYNAMIC)
       {
          if (!m_main_stop.Broker())

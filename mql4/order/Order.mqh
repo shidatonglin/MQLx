@@ -63,6 +63,8 @@ COrder::~COrder(void)
 //+------------------------------------------------------------------+
 COrder::Ticket(const ulong ticket)
   {
+   if(!m_ticket_current.IsSorted())
+      m_ticket_current.Sort();
    m_ticket_current.InsertSort((int)ticket);
   }
 //+------------------------------------------------------------------+

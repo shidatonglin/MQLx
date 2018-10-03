@@ -50,6 +50,7 @@ public:
    double            Volume(const string,const double,const ENUM_ORDER_TYPE,const double);
    void              Volume(const double);
    double            Volume(void) const;
+   static bool       MarginCheck(const string, const double);
 protected:
    virtual void      OnLotSizeUpdated(void);
    virtual bool      UpdateLotSize(const string,const double,const ENUM_ORDER_TYPE,const double);
@@ -181,6 +182,54 @@ double CMoneyBase::Volume(const string symbol,const double price,const ENUM_ORDE
       OnLotSizeUpdated();
    return m_volume;
   }
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+bool CMoneyBase::MarginCheck(const string symbol, const double volume)
+  {
+   string first    = StringSubstr(symbol,0,3); // the first symbol, for example,  EUR
+   string second   = StringSubstr(symbol,3,3); // the second symbol, for example, USD
+   string currency = AccountCurrency();        // deposit currency, for example,  USD
+   double leverage = AccountLeverage();        // leverage, for example,          100
+// contract size, for example, 100000
+   double contract = MarketInfo(symbol, MODE_LOTSIZE);
+   double bid      = MarketInfo(symbol, MODE_BID);      // Bid price
+   double requiredMargin = 0.0;
+//---- allow only standard forex symbols like XXXYYY
+   if(StringLen(symbol) != 6)
+     {
+      Print("MarginCalculate: '",symbol,"' must be standard forex symbol XXXYYY");
+      //return(0.0);
+      return true;
+     }
+//---- check for data availability
+   if(bid <= 0 || contract <= 0) 
+     {
+      Print("MarginCalculate: no market information for '",symbol,"'");
+      return true;
+      //return(0.0);
+     }
+//---- check the simplest variations - without cross currencies
+   if(first == currency)   
+       requiredMargin = (contract*volume / leverage);           // USDxxx
+   if(second == currency)  
+       requiredMargin = (contract*bid*volume / leverage);       // xxxUSD
+//---- check normal cross currencies, search for direct conversion through deposit currency
+   string base = currency + first;                // USDxxx
+   if(MarketInfo(base, MODE_BID) > 0) 
+       requiredMargin = (contract / MarketInfo(base, MODE_BID)*volume / leverage);
+//---- try vice versa
+   base = first + currency;                          // xxxUSD
+   if(MarketInfo(base, MODE_BID) > 0) 
+       requiredMargin = (contract*MarketInfo(base, MODE_BID)*volume / leverage);
+   if(requiredMargin >= AccountEquity() * 0.9) {
+      Print("No enough money");
+      return false;
+   }
+//---- direct conversion is impossible
+   //Print("MarginCalculate: can not convert '",symbol,"'");
+   return(true);
+  } 
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+

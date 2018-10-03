@@ -14,6 +14,7 @@ class CExpertAdvisorsBase : public CArrayObj
   {
 protected:
    bool              m_active;
+   bool              m_debug;
    int               m_uninit_reason;
    CObject          *m_container;
 public:
@@ -26,6 +27,8 @@ public:
    CObject          *GetContainer(void);
    bool              Active(void) const;
    void              Active(const bool);
+   bool              Debug(void) const;
+   void              Debug(const bool);
    int               OrdersTotal(void) const;
    int               OrdersHistoryTotal(void) const;
    int               TradesTotal(void) const;
@@ -47,6 +50,7 @@ public:
 //|                                                                  |
 //+------------------------------------------------------------------+
 CExpertAdvisorsBase::CExpertAdvisorsBase(void) : m_active(true),
+                                                 m_debug(false),
                                                  m_uninit_reason(0)
   {
   }
@@ -108,6 +112,20 @@ bool CExpertAdvisorsBase::Active(void) const
 void CExpertAdvisorsBase::Active(const bool value)
   {
    m_active=value;
+  }
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+bool CExpertAdvisorsBase::Debug(void) const
+  {
+   return m_debug;
+  }
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+void CExpertAdvisorsBase::Debug(const bool value)
+  {
+   m_debug=value;
   }
 //+------------------------------------------------------------------+
 //|                                                                  |

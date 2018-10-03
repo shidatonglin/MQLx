@@ -21,6 +21,7 @@ class CExpertAdvisorBase : public CObject
 protected:
    //--- trade parameters
    bool              m_active;
+   bool              m_debug;
    string            m_name;
    int               m_distance;
    double            m_distance_factor_long;
@@ -73,6 +74,8 @@ public:
    //--- activation and deactivation
    bool              Active(void) const;
    void              Active(const bool);
+    bool             Debug(void) const;
+   void              Debug(const bool);
    //--- setters and getters       
    string            Name(void) const;
    void              Name(const string);
@@ -162,6 +165,7 @@ protected:
 //|                                                                  |
 //+------------------------------------------------------------------+
 CExpertAdvisorBase::CExpertAdvisorBase(void) : m_active(true),
+                                               m_debug(false),
                                                m_name(NULL),
                                                m_distance(0),
                                                m_distance_factor_long(1),
@@ -209,6 +213,20 @@ CExpertAdvisorBase::Active(const bool value)
 bool CExpertAdvisorBase::Active(void) const
   {
    return m_active;
+  }
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+bool CExpertAdvisorBase::Debug(void) const
+  {
+   return m_active;
+  }
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+void CExpertAdvisorBase::Debug(const bool value)
+  {
+   m_debug=value;
   }
 //+------------------------------------------------------------------+
 //|                                                                  |
@@ -807,6 +825,7 @@ bool CExpertAdvisorBase::OnTick(void)
       checkcloseshort= m_signals.CheckCloseShort();
      }
    COrders *orders=m_order_man.Orders();
+   //Print("orders.Total()->",orders.Total());
    for(int i=orders.Total()-1;i>=0;i--)
      {
       COrder *order=orders.At(i);
@@ -828,6 +847,13 @@ bool CExpertAdvisorBase::OnTick(void)
      }
    m_order_man.OnTick();
    bool result=false;
+   /*
+   Print("1.1 Signal->checkopenlong "+(checkopenlong ));
+   Print("1.2 Signal->checkopenshort "+(checkopenshort ));
+   Print("2 New Bar->"+(m_every_tick || IsNewBar(m_symbol_name,m_period)));
+   Print("3 Time->"+(!CheckPointer(m_times) || m_times.Evaluate()));
+   Print("4 One Order Per Bar->"+(!m_one_trade_per_candle || m_last_trade_time<Time(0)));
+   */
    if((checkopenlong || checkopenshort) && 
       (m_every_tick || IsNewBar(m_symbol_name,m_period)) && 
       (!CheckPointer(m_times) || m_times.Evaluate()) && 
